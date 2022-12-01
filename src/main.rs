@@ -1,4 +1,4 @@
-use pkg::day_1::main::print_solutions;
+use pkg::day_1::print_solutions::print_solutions;
 
 pub mod pkg;
 

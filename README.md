@@ -10,4 +10,4 @@ My plan at the time of writing is to have the `fn main` printout the solutions t
 
 1. Make sure you have rust installed (I'm on 1.64.0).
 2. Clone this repository.
-3. From anywhere in the project tree do `cargo run`.
+3. From the project root do `cargo run`.
