@@ -1,5 +1,6 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::BufRead;
+
+use crate::pkg::utils::get_file_reader;
 
 pub fn print_solutions() {
     let elves = read_elves("./src/pkg/day_1/input.txt");
@@ -30,12 +31,6 @@ fn read_elves(filename: &str) -> Vec<Elf> {
     }
 
     return results;
-}
-
-fn get_file_reader(filename: &str) -> BufReader<File> {
-    let file = File::open(filename).expect("File could not be opened.");
-    let reader = BufReader::new(file);
-    reader
 }
 
 // An alternative here would be to sort.
