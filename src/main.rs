@@ -1,7 +1,8 @@
-use pkg::day_1::print_solutions::print_solutions;
+use pkg::{day_1, day_2};
 
 pub mod pkg;
 
 pub fn main() {
-    print_solutions()
+    day_1::print_solutions::print_solutions();
+    day_2::print_solutions::print_solutions();
 }
