@@ -2,6 +2,7 @@ use std::{fmt, str::FromStr};
 
 use super::item::Item;
 
+#[derive(Clone)]
 pub(crate) struct Rucksack {
     first_compartment: Vec<Item>,
     second_compartment: Vec<Item>,
@@ -51,5 +52,14 @@ impl Rucksack {
             .first_compartment
             .iter()
             .find(|i1| self.second_compartment.contains(i1));
+    }
+
+    pub fn get_all_items(&self) -> Vec<&Item> {
+        let mut result: Vec<&Item> = vec![];
+
+        result.extend(&self.first_compartment);
+        result.extend(&self.second_compartment);
+
+        return result;
     }
 }
