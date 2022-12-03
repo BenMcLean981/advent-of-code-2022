@@ -14,8 +14,8 @@ pub fn print_solutions() {
     let part_2_score = get_total_score(part_2_games);
 
     println!("Day 2:");
-    println!("The total score for day 2 part one is {}.", part_1_score);
-    println!("The total score for day 2 part two is {}.", part_2_score);
+    println!("The misenterpreted total score is {}.", part_1_score);
+    println!("The correct total score is {}.", part_2_score);
 }
 
 fn parse_part_1_games(filename: &str) -> Vec<Game> {
