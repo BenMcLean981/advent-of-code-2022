@@ -4,20 +4,34 @@ use std::{fmt, str::FromStr};
 pub(crate) struct RangePair(Range<usize>, Range<usize>);
 
 impl RangePair {
-    pub fn does_one_contain_other(&self) -> bool {
+    pub(crate) fn does_one_contain_other(&self) -> bool {
         return RangePair::is_subset(self.0.clone(), self.1.clone())
             || RangePair::is_subset(self.1.clone(), self.0.clone());
     }
 
-    fn is_subset(
-        outer: Range<usize>,
-        mut inner: Range<usize>,
-    ) -> bool {
+    fn is_subset(outer: Range<usize>, mut inner: Range<usize>) -> bool {
         return inner.all(|i: usize| outer.contains(&i));
     }
 
     fn new(first: Range<usize>, second: Range<usize>) -> RangePair {
         return RangePair(first, second);
+    }
+
+    pub(crate) fn is_there_any_overlap(&self) -> bool {
+        return RangePair::any_elements_in_other(
+            self.0.clone(),
+            self.1.clone(),
+        ) || RangePair::any_elements_in_other(
+            self.1.clone(),
+            self.0.clone(),
+        );
+    }
+
+    fn any_elements_in_other(
+        container: Range<usize>,
+        mut elements: Range<usize>,
+    ) -> bool {
+        return elements.any(|i| container.contains(&i));
     }
 }
 
@@ -46,8 +60,7 @@ impl FromStr for RangePair {
 fn range_from_str(s: &str) -> Range<usize> {
     let split: Vec<&str> = s.split("-").collect();
 
-    let error_str: &str =
-        &format!("Cannot read range from string={s}");
+    let error_str: &str = &format!("Cannot read range from string={s}");
 
     let start: &str = split[0];
     let start: usize = usize::from_str(start).expect(error_str);
