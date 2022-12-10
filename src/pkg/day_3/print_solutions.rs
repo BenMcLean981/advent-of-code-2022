@@ -1,6 +1,6 @@
 use std::{io::BufRead, str::FromStr};
 
-use crate::pkg::utils::get_file_reader;
+use crate::pkg::utils::{get_file_reader, read_to_struct};
 
 use super::{elf_group::ElfGroup, rucksack::Rucksack};
 
@@ -16,25 +16,12 @@ pub fn print_solutions() {
 }
 
 fn get_part_1_sum(filename: &str) -> u32 {
-    let rucksacks: Vec<Rucksack> = parse_rucksacks(filename);
+    let rucksacks: Vec<Rucksack> = read_to_struct(filename);
     let sum = rucksacks.iter().fold(0, |sum, rucksack| {
         sum + rucksack.get_priority_of_common_item()
     });
 
     return sum;
-}
-
-fn parse_rucksacks(filename: &str) -> Vec<Rucksack> {
-    let reader = get_file_reader(filename);
-
-    let mut results: Vec<Rucksack> = vec![];
-
-    for line in reader.lines() {
-        let line = line.unwrap();
-        results.push(Rucksack::from_str(&line).unwrap());
-    }
-
-    return results;
 }
 
 fn get_part_2_sum(filename: &str) -> u32 {
