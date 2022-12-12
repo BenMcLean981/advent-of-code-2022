@@ -1,18 +1,35 @@
-use std::{io::BufRead, rc::Rc};
+use std::io::BufRead;
 
 use crate::pkg::utils::get_file_reader;
 
-use super::{cd::Cd, dir::Dir, ls::Ls};
+use super::{cd::Cd, ls::Ls, workspace::WorkSpace};
 
 pub fn print_solutions() {
-    let filename = "./src/pkg/day_7/test.txt";
+    let filename = "./src/pkg/day_7/input.txt";
+
+    let file_system = read_file_system(filename);
+    let part_1_size = 100000;
+    let sum_under_size = file_system.get_sum_under(part_1_size);
+
+    let disk_size = 70000000;
+    let req_size = 30000000;
+    let smallest_over_size: usize =
+        file_system.get_smallest_over(disk_size, req_size);
 
     println!("Day 7:");
+    println!(
+        "The sum of all files of size under {} is {}.",
+        part_1_size, sum_under_size
+    );
+    println!(
+        "The smallest that can be deleted to free up to {} is of size {}.",
+        req_size, smallest_over_size
+    );
 }
 
-fn read_file_system(filename: &str) -> &Dir {
-    let mut working_directory: Rc<Dir> =
-        Rc::new(Dir::new("/".to_string(), None));
+fn read_file_system(filename: &str) -> WorkSpace {
+    let mut workspace = WorkSpace::new();
+    let mut working_directory: usize = 0;
 
     let commands = group_by_commands(filename);
 
@@ -21,14 +38,14 @@ fn read_file_system(filename: &str) -> &Dir {
 
         if is_cd(&line) {
             let cd = Cd::from(command);
-            working_directory = Dir::cd(Rc::clone(&working_directory), cd);
+            working_directory = workspace.dirs[working_directory].cd(cd);
         } else if is_ls(&line) {
             let ls = Ls::from(command);
-            Dir::add_ls(Rc::clone(&working_directory), ls);
+            workspace.add_ls(working_directory, ls)
         }
     }
 
-    return working_directory.get_root();
+    return workspace.clone();
 }
 
 fn group_by_commands(filename: &str) -> Vec<Vec<String>> {
@@ -49,6 +66,8 @@ fn group_by_commands(filename: &str) -> Vec<Vec<String>> {
         next_command.push(line);
     }
 
+    commands.push(next_command);
+
     return commands;
 }
 
@@ -67,12 +86,4 @@ fn is_command_type(line: &str, cmd_type: &str) -> bool {
 
 fn is_command(line: &str) -> bool {
     return line.chars().nth(0).unwrap() == '$';
-}
-
-fn is_dir(line: &str) -> bool {
-    return line.split(" ").nth(0).unwrap() != "dir";
-}
-
-fn is_file(line: &str) -> bool {
-    return !is_command(line) && !is_dir(line);
 }

@@ -5,3 +5,5 @@ mod file;
 
 mod cd;
 mod ls;
+
+mod workspace;
