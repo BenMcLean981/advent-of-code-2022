@@ -1,31 +1,14 @@
+use std::cmp;
+
 use super::tree::Tree;
 
 pub(crate) struct Grid {
     rows: Vec<Vec<Tree>>,
-    num_rows: usize,
-    num_cols: usize,
 }
 
 impl Grid {
-    pub(crate) fn new(
-        rows: Vec<Vec<Tree>>,
-        num_rows: usize,
-        num_cols: usize,
-    ) -> Self {
-        return Grid {
-            rows,
-            num_rows,
-            num_cols,
-        };
-    }
-
-    pub(crate) fn get_all_visible(&self) -> Vec<&Tree> {
-        return self
-            .get_trees()
-            .iter()
-            .filter(|t| self.is_visible(t))
-            .map(|t| *t)
-            .collect();
+    pub(crate) fn new(rows: Vec<Vec<Tree>>) -> Self {
+        return Grid { rows };
     }
 
     fn get_col(&self, col: usize) -> Vec<Tree> {
@@ -40,38 +23,77 @@ impl Grid {
         return self.rows.iter().flat_map(|r| r).collect();
     }
 
-    fn is_hidden(&self, tree: &Tree) -> bool {
-        return !self.is_visible(tree);
+    pub(crate) fn get_all_visible(&self) -> Vec<&Tree> {
+        return self
+            .get_trees()
+            .iter()
+            .filter(|t| self.is_visible(t))
+            .map(|t| *t)
+            .collect();
     }
 
     fn is_visible(&self, tree: &Tree) -> bool {
-        let is_visible_in_row = self.is_visible_in_row(tree);
-        let is_visible_in_col = self.is_visible_in_col(tree);
-
-        return is_visible_in_row || is_visible_in_col;
+        return Grid::are_all_shorter(self.get_trees_above(tree), tree)
+            || Grid::are_all_shorter(self.get_trees_below(tree), tree)
+            || Grid::are_all_shorter(self.get_trees_left(tree), tree)
+            || Grid::are_all_shorter(self.get_trees_right(tree), tree);
     }
 
-    fn is_visible_in_row(&self, tree: &Tree) -> bool {
-        let row = self.get_row(tree.row);
-
-        let before = row[0..tree.col].to_vec();
-        let after = row[tree.col + 1..].to_vec();
-
-        return Grid::are_all_shorter(before, tree.size)
-            || Grid::are_all_shorter(after, tree.size);
+    fn are_all_shorter(trees: Vec<Tree>, tree: &Tree) -> bool {
+        return trees.iter().all(|t| t.size < tree.size);
     }
 
-    fn is_visible_in_col(&self, tree: &Tree) -> bool {
+    pub(crate) fn get_best_scenic_score(&self) -> usize {
+        return self.get_trees().iter().fold(0, |score, tree| {
+            cmp::max(score, self.get_scenic_score(tree))
+        });
+    }
+
+    fn get_scenic_score(&self, tree: &Tree) -> usize {
+        let above_score = Grid::get_score(tree, self.get_trees_above(tree));
+        let below_score = Grid::get_score(tree, self.get_trees_below(tree));
+        let left_score = Grid::get_score(tree, self.get_trees_left(tree));
+        let right_score = Grid::get_score(tree, self.get_trees_right(tree));
+
+        return above_score * below_score * left_score * right_score;
+    }
+
+    fn get_score(tree: &Tree, line: Vec<Tree>) -> usize {
+        let first_taller = line.iter().position(|t| t.size >= tree.size);
+
+        match first_taller {
+            Some(pos) => pos + 1,
+            None => line.len(),
+        }
+    }
+
+    fn get_trees_above(&self, tree: &Tree) -> Vec<Tree> {
         let col = self.get_col(tree.col);
 
-        let before = col[0..tree.row].to_vec();
-        let after = col[tree.row + 1..].to_vec();
+        let mut above = col[0..tree.row].to_vec();
+        above.reverse();
 
-        return Grid::are_all_shorter(before, tree.size)
-            || Grid::are_all_shorter(after, tree.size);
+        return above;
     }
 
-    fn are_all_shorter(trees: Vec<Tree>, size: usize) -> bool {
-        return trees.iter().all(|t| t.size < size);
+    fn get_trees_below(&self, tree: &Tree) -> Vec<Tree> {
+        let col = self.get_col(tree.col);
+
+        return col[tree.row + 1..].to_vec();
+    }
+
+    fn get_trees_left(&self, tree: &Tree) -> Vec<Tree> {
+        let row = self.get_row(tree.row);
+
+        let mut left = row[0..tree.col].to_vec();
+        left.reverse();
+
+        return left;
+    }
+
+    fn get_trees_right(&self, tree: &Tree) -> Vec<Tree> {
+        let row = self.get_row(tree.row);
+
+        return row[tree.col + 1..].to_vec();
     }
 }

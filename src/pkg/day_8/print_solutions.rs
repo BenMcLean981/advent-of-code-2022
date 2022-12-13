@@ -12,10 +12,17 @@ pub fn print_solutions() {
     let grid = read_grid(filename);
     let num_visible = grid.get_all_visible().len();
 
+    let scenic_score = grid.get_best_scenic_score();
+
     println!(
         "The number of visible trees in the grid is: {}.",
         num_visible,
     );
+
+    println!(
+        "The best possible scenic score in the grid is: {}.",
+        scenic_score
+    )
 }
 
 fn read_grid(filename: &str) -> Grid {
@@ -39,8 +46,5 @@ fn read_grid(filename: &str) -> Grid {
         rows.push(row);
     }
 
-    let num_rows = rows.len();
-    let num_cols = rows[0].len();
-
-    return Grid::new(rows, num_rows, num_cols);
+    return Grid::new(rows);
 }
