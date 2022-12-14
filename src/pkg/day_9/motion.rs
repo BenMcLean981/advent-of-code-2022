@@ -2,6 +2,7 @@ use std::{fmt, str::FromStr};
 
 use super::direction::Direction;
 
+#[derive(Copy, Clone)]
 pub(crate) struct Motion {
     pub direction: Direction,
     pub distance: usize,

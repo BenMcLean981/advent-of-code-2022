@@ -1,14 +1,23 @@
 use super::{direction::Direction, motion::Motion, position::Position};
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub(crate) struct Rope {
-    pub head: Position,
-    pub tail: Position,
+    pub knots: Vec<Position>,
 }
 
 impl Rope {
-    pub(crate) fn new(head: Position, tail: Position) -> Rope {
-        return Rope { head, tail };
+    pub(crate) fn new(knots: Vec<Position>) -> Rope {
+        return Rope { knots };
+    }
+
+    pub(crate) fn zero(num_knots: usize) -> Rope {
+        let mut knots: Vec<Position> = vec![];
+
+        for _ in 0..num_knots {
+            knots.push(Position::zero());
+        }
+
+        return Rope::new(knots);
     }
 
     /* Returns each step in the move, excluding the current state. */
@@ -25,28 +34,32 @@ impl Rope {
         return steps;
     }
 
+    /*
+     * This is definitely not the nicest code but
+     * I can't think of a better way to do this
+     * right now without overcomplicating things.
+     */
     fn apply_move(&self, d: Direction) -> Rope {
-        let old_head_position: Position = self.head;
-        let mut head_moved = self.move_head(d);
-        head_moved.rectify_tail(old_head_position);
+        let moved_head = self.knots[0].apply_move(d);
+        let mut new_knot_positions: Vec<Position> = vec![moved_head];
 
-        return head_moved;
-    }
+        for (i, knot) in self.knots[1..].iter().enumerate() {
+            let ahead = new_knot_positions[i];
 
-    fn move_head(&self, d: Direction) -> Rope {
-        let moved_head = self.head.apply_move(d);
-        return Rope::new(moved_head, self.tail);
-    }
+            let required_dir = knot.get_direction_to_be_near_head(ahead);
 
-    fn rectify_tail(&mut self, old_head_position: Position) {
-        let distance = self.tail.get_distance(self.head);
+            let new_knot_position = match required_dir {
+                Some(d) => knot.apply_move(d),
+                None => *knot,
+            };
 
-        if distance == 2 {
-            self.tail = old_head_position;
+            new_knot_positions.push(new_knot_position);
         }
+
+        return Rope::new(new_knot_positions);
     }
 
-    pub(crate) fn zero() -> Rope {
-        return Rope::new(Position::new(0, 0), Position::new(0, 0));
+    pub(crate) fn get_tail(&self) -> Position {
+        return self.knots[self.knots.len() - 1];
     }
 }
