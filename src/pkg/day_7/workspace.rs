@@ -9,7 +9,7 @@ pub(crate) struct WorkSpace {
 
 impl WorkSpace {
     pub(crate) fn new() -> Self {
-        let root = Dir::new("/".to_string(), None);
+        let root = Dir::new(None);
 
         return WorkSpace { dirs: vec![root] };
     }
@@ -19,7 +19,7 @@ impl WorkSpace {
             let idx = self.dirs.clone().len();
             let dir = dir.to_string();
 
-            self.dirs.push(Dir::new(dir.clone(), Some(to)));
+            self.dirs.push(Dir::new(Some(to)));
             self.dirs[to].add_dir(dir, idx);
         }
 

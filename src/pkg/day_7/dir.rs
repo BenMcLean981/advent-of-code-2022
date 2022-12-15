@@ -4,16 +4,14 @@ use super::{cd::Cd, file::File};
 
 #[derive(Clone)]
 pub(crate) struct Dir {
-    name: String,
     parent: Option<usize>,
     pub sub_directories: HashMap<String, usize>,
     pub files: Vec<File>,
 }
 
 impl Dir {
-    pub(crate) fn new<'a>(name: String, parent: Option<usize>) -> Dir {
+    pub(crate) fn new<'a>(parent: Option<usize>) -> Dir {
         return Dir {
-            name,
             parent,
             sub_directories: HashMap::new(),
             files: vec![],

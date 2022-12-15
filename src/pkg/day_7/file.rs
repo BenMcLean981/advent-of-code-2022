@@ -3,7 +3,6 @@ use std::{fmt, str::FromStr};
 #[derive(Clone)]
 pub(crate) struct File {
     pub size: usize,
-    name: String,
 }
 
 #[derive(Debug)]
@@ -24,10 +23,7 @@ impl FromStr for File {
         let size = usize::from_str(split[0]);
 
         match size {
-            Ok(size) => Ok(File {
-                size,
-                name: split[1].to_string(),
-            }),
+            Ok(size) => Ok(File { size }),
             Err(_) => Err(FileParseError),
         }
     }
