@@ -8,14 +8,28 @@ pub fn print_solutions() {
     let filename = "./src/pkg/day_11/input.txt";
 
     let monkeys = get_monkeys(filename);
-    let simulated = simualte_monkeys(monkeys, 20);
-    let monkey_business = get_monkey_business(simulated);
+
+    let destressing_rounds = 20;
+    let destressing_simulation =
+        simualte_monkeys(monkeys.clone(), destressing_rounds, &|x| x / 3);
+    let destressed_monkey_business =
+        get_monkey_business(destressing_simulation);
+
+    let stressing_rounds = 10_000;
+    let divisor = lcm(&monkeys);
+    let stressing_simulation =
+        simualte_monkeys(monkeys, stressing_rounds, &|x| x % divisor);
+    let stressed_monkey_business = get_monkey_business(stressing_simulation);
 
     println!("Day 11:");
     println!(
-        "The monkey business after 20 rounds is {}.",
-        monkey_business
-    )
+        "The monkey business after {} destressing rounds is {}.",
+        destressing_rounds, destressed_monkey_business
+    );
+    println!(
+        "The monkey business after {} stressing rounds is {}.",
+        stressing_rounds, stressed_monkey_business
+    );
 }
 
 fn get_monkeys(filename: &str) -> Vec<Monkey> {
@@ -47,24 +61,31 @@ fn group_monkeys(filename: &str) -> Vec<Vec<String>> {
     return monkey_lines;
 }
 
-fn simualte_monkeys(monkeys: Vec<Monkey>, rounds: usize) -> Vec<Monkey> {
+fn simualte_monkeys(
+    monkeys: Vec<Monkey>,
+    rounds: usize,
+    reducer: &dyn Fn(usize) -> usize,
+) -> Vec<Monkey> {
     let mut monkeys = monkeys;
 
     for _ in 0..rounds {
-        monkeys = run_round(monkeys);
+        monkeys = run_round(monkeys, reducer);
     }
 
     return monkeys;
 }
 
-fn run_round(monkeys: Vec<Monkey>) -> Vec<Monkey> {
+fn run_round(
+    monkeys: Vec<Monkey>,
+    reducer: &dyn Fn(usize) -> usize,
+) -> Vec<Monkey> {
     let mut next_monkeys = monkeys.clone();
 
     for i in 0..next_monkeys.len() {
         while next_monkeys[i].has_items() {
             let item = next_monkeys[i].pop_item();
 
-            let item = next_monkeys[i].perform_operation(item);
+            let item = next_monkeys[i].perform_operation(item, reducer);
             let target = next_monkeys[i].determine_target(item);
 
             next_monkeys[target].push_item(item);
@@ -81,4 +102,18 @@ fn get_monkey_business(monkeys: Vec<Monkey>) -> usize {
     scores.sort();
 
     return scores[scores.len() - 1] * scores[scores.len() - 2];
+}
+
+fn lcm(monkeys: &Vec<Monkey>) -> usize {
+    return monkeys
+        .iter()
+        .fold(1, |prod, m| prod * m.divisor / gcd(prod, m.divisor));
+}
+
+fn gcd(a: usize, b: usize) -> usize {
+    if a == 0 {
+        return b;
+    } else {
+        return gcd(b % a, a);
+    }
 }

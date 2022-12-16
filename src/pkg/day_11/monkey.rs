@@ -4,7 +4,7 @@ use std::{cell::RefCell, collections::VecDeque, rc::Rc, str::FromStr};
 pub(crate) struct Monkey {
     items: VecDeque<usize>,
     pub operation: Rc<RefCell<dyn Fn(usize) -> usize>>,
-    test: Rc<RefCell<dyn Fn(usize) -> bool>>,
+    pub divisor: usize,
     true_target: usize,
     false_target: usize,
     pub num_inspections: usize,
@@ -13,15 +13,19 @@ pub(crate) struct Monkey {
 impl Monkey {
     pub fn determine_target(&mut self, item: usize) -> usize {
         self.num_inspections += 1;
-        match (self.test.as_ref().borrow())(item) {
+        match item % self.divisor == 0 {
             true => self.true_target,
             false => self.false_target,
         }
     }
 
-    pub fn perform_operation(&self, item: usize) -> usize {
+    pub fn perform_operation(
+        &self,
+        item: usize,
+        reducer: &dyn Fn(usize) -> usize,
+    ) -> usize {
         let operated = (self.operation.as_ref().borrow())(item);
-        return operated / 3;
+        return (reducer)(operated);
     }
 
     pub fn has_items(&self) -> bool {
@@ -41,14 +45,14 @@ impl From<&Vec<String>> for Monkey {
     fn from(lines: &Vec<String>) -> Self {
         let items = get_items(&lines[1]);
         let operation = get_operation(&lines[2]);
-        let test = get_test(&lines[3]);
+        let divisor = get_divisor(&lines[3]);
         let true_target = get_target(&lines[4]);
         let false_target = get_target(&lines[5]);
 
         return Monkey {
             items,
             operation,
-            test,
+            divisor,
             true_target,
             false_target,
             num_inspections: 0,
@@ -84,13 +88,13 @@ fn get_operation(line: &str) -> Rc<RefCell<dyn Fn(usize) -> usize>> {
     }
 }
 
-fn get_test(line: &str) -> Rc<RefCell<dyn Fn(usize) -> bool>> {
+fn get_divisor(line: &str) -> usize {
     let split: Vec<&str> = line.split(" ").collect();
 
     let arg = split[split.len() - 1];
     let arg = usize::from_str(arg).unwrap();
 
-    return Rc::new(RefCell::new(move |x| x % arg == 0));
+    return arg;
 }
 
 fn get_target(line: &str) -> usize {
