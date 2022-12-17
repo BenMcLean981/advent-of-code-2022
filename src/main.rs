@@ -14,4 +14,5 @@ pub fn main() {
     day_9::print_solutions::print_solutions();
     day_10::print_solutions::print_solutions();
     day_11::print_solutions::print_solutions();
+    day_12::print_solutions::print_solutions();
 }
