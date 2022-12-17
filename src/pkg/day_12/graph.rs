@@ -42,14 +42,13 @@ impl Graph {
         return nodes;
     }
 
-    pub fn find_shortest_path(
-        &self,
-        start: Rc<RefCell<Node>>,
-    ) -> Option<Path> {
+    pub fn find_shortest_path(&self, target: Height) -> Path {
         let mut explored: HashSet<Node> = HashSet::new();
-        explored.insert(start.as_ref().borrow().clone());
 
-        let base_path = Path::initialize(start);
+        let end = self.get_end();
+        explored.insert(end.as_ref().borrow().clone());
+
+        let base_path = Path::initialize(end);
 
         let mut paths: VecDeque<Path> = VecDeque::new();
         paths.push_back(base_path);
@@ -57,8 +56,8 @@ impl Graph {
         while !paths.is_empty() {
             let to_grow = paths.pop_back().unwrap();
 
-            if to_grow.is_done() {
-                return Some(to_grow);
+            if to_grow.is_done(target) {
+                return to_grow;
             } else {
                 let tail = to_grow.get_tail();
                 let neighbors =
@@ -71,27 +70,18 @@ impl Graph {
             }
         }
 
-        return None;
+        panic!("No path can reach this height.");
     }
 
-    pub fn get_start(&self) -> Rc<RefCell<Node>> {
+    pub fn get_end(&self) -> Rc<RefCell<Node>> {
         let nodes = self.get_nodes();
 
         let start = nodes
             .iter()
-            .find(|n| n.as_ref().borrow().height == Height::Start)
+            .find(|n| n.as_ref().borrow().height == Height::End)
             .unwrap();
 
         return Rc::clone(start);
-    }
-
-    pub fn get_zero_heights(&self) -> Vec<Rc<RefCell<Node>>> {
-        return self
-            .get_nodes()
-            .iter()
-            .filter(|n| n.as_ref().borrow().height == Height::NodeHeight(0))
-            .map(|n| Rc::clone(n))
-            .collect();
     }
 
     fn get_accessible_neighbors(
@@ -101,11 +91,18 @@ impl Graph {
     ) -> Vec<Rc<RefCell<Node>>> {
         let neighbors = self.get_neighbors(node);
 
-        return neighbors
+        // remember, this is end -> start.
+        let reachable = neighbors
             .iter()
             .filter(|n| {
-                node.as_ref().borrow().can_reach(n.as_ref().borrow().height)
+                node.as_ref()
+                    .borrow()
+                    .can_reach_from(n.as_ref().borrow().height)
             })
+            .collect::<Vec<_>>();
+
+        return reachable
+            .iter()
             .filter(|n| !explored.contains(&n.as_ref().borrow()))
             .map(|n| Rc::clone(n))
             .collect();

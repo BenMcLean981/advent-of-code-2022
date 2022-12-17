@@ -14,19 +14,15 @@ impl Node {
         return Node { height, row, col };
     }
 
-    pub fn can_reach(&self, height: Height) -> bool {
-        match height {
-            Height::NodeHeight(other_h) => match self.height {
-                Height::NodeHeight(h) => other_h <= h + 1,
-                Height::Start => true,
-                Height::End => false,
+    pub fn can_reach_from(&self, from: Height) -> bool {
+        match from {
+            Height::NodeHeight(from_h) => match self.height {
+                Height::NodeHeight(h) => h <= from_h + 1,
+                Height::Start => false,
+                Height::End => from_h == 25,
             },
-            Height::Start => false,
-            Height::End => match self.height {
-                Height::NodeHeight(h) => h == 25,
-                Height::Start => true,
-                Height::End => false,
-            },
+            Height::Start => true,
+            Height::End => false,
         }
     }
 }

@@ -16,8 +16,8 @@ impl Path {
         return Path::new(vec![node]);
     }
 
-    pub fn is_done(&self) -> bool {
-        return self.get_tail().as_ref().borrow().height == Height::End;
+    pub fn is_done(&self, height: Height) -> bool {
+        return self.get_tail().as_ref().borrow().height == height;
     }
 
     pub fn get_tail(&self) -> Rc<RefCell<Node>> {
