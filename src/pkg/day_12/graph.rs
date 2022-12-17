@@ -42,8 +42,10 @@ impl Graph {
         return nodes;
     }
 
-    pub fn find_shortest_path(&self) -> Path {
-        let start = self.get_start();
+    pub fn find_shortest_path(
+        &self,
+        start: Rc<RefCell<Node>>,
+    ) -> Option<Path> {
         let mut explored: HashSet<Node> = HashSet::new();
         explored.insert(start.as_ref().borrow().clone());
 
@@ -56,7 +58,7 @@ impl Graph {
             let to_grow = paths.pop_back().unwrap();
 
             if to_grow.is_done() {
-                return to_grow;
+                return Some(to_grow);
             } else {
                 let tail = to_grow.get_tail();
                 let neighbors =
@@ -69,10 +71,10 @@ impl Graph {
             }
         }
 
-        panic!("No path exists.")
+        return None;
     }
 
-    fn get_start(&self) -> Rc<RefCell<Node>> {
+    pub fn get_start(&self) -> Rc<RefCell<Node>> {
         let nodes = self.get_nodes();
 
         let start = nodes
@@ -81,6 +83,15 @@ impl Graph {
             .unwrap();
 
         return Rc::clone(start);
+    }
+
+    pub fn get_zero_heights(&self) -> Vec<Rc<RefCell<Node>>> {
+        return self
+            .get_nodes()
+            .iter()
+            .filter(|n| n.as_ref().borrow().height == Height::NodeHeight(0))
+            .map(|n| Rc::clone(n))
+            .collect();
     }
 
     fn get_accessible_neighbors(
