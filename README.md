@@ -1,6 +1,6 @@
 # My Advent-Of-Code 2022 Solution!
 
-This is my solution to Advent of Code 2022. I'm going to do my best to keep up with it every day. I'm going to solve it in rust because it is a language I'd like to become more experienced with.
+This is my solution to [Advent of Code 2022](https://adventofcode.com/). I'm going to do my best to keep up with it every day. I'm going to solve it in rust because it is a language I'd like to become more experienced with.
 
 As this is one of my first Rust endeavours, this might not be the cleanest solution you've ever seen. But I will be making an effort to keep things clean and well organized.
 
